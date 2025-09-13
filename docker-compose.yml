@@ -1,0 +1,126 @@
+version: '3.8'
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  processor:
+    build:
+      context: .
+      dockerfile: apps/processor/Dockerfile
+    env_file:
+      - .env
+    environment:
+      PORT: ${PROCESSOR_PORT}
+    expose:
+      - ${PROCESSOR_PORT}
+    ports:
+      - "${PROCESSOR_PORT}:${PROCESSOR_PORT}"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    depends_on:
+      processor:
+        condition: service_started
+    expose:
+      - ${FRONTEND_PORT}
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    networks:
+      - app-network
+
+  hook:
+    build:
+      context: .
+      dockerfile: apps/hooks/Dockerfile
+    depends_on:
+      processor:
+        condition: service_started
+    env_file:
+      - .env
+    expose:
+      - ${HOOKS_PORT}
+    ports:
+      - "${HOOKS_PORT}:${HOOKS_PORT}"
+    networks:
+      - app-network
+
+  # Zookeeper (Kafka needs this)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      # Try different environment variable names
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: "srvr,ruok,stat"
+      ZOO_4LW_COMMANDS_WHITELIST: "srvr,ruok,stat"
+      ZOOKEEPER_ENABLE_4LW_COMMANDS: "srvr,ruok,stat"
+    ports:
+      - "2181:2181"
+    healthcheck:
+      # Use a simpler health check that doesn't rely on four-letter commands
+      test: ["CMD", "bash", "-c", "nc -z localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - app-network
+
+  # Kafka Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "bash", "-c", "nc -z localhost 9092 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+    networks:
+      - app-network
+
+  sweeper:
+    build:
+      context: .
+      dockerfile: apps/sweeper/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: on-failure:3
+    networks:
+      - app-network
+  
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: on-failure:3
+    networks:
+      - app-network

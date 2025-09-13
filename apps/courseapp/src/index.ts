@@ -1,7 +1,8 @@
-import express, { json }  from "express";
+import express from "express";
 const app = express();
-
+app.use(express.json());
 app.post("/puchased/course", (req,res)=>{
+    console.log("hitted")
     const body = req.body;
     console.log(body);
     res.json({

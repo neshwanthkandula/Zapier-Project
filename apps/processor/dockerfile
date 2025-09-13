@@ -1,0 +1,30 @@
+# apps/processor/Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY turbo.json ./
+COPY apps/processor/package.json ./apps/processor/
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies (including Prisma)
+RUN npm install
+
+# Copy source code
+COPY apps/processor/ ./apps/processor/
+COPY packages/db/ ./packages/db/
+
+# Generate Prisma client for Linux
+RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+# Run Prisma migrations (optional - if you want auto-migrations)
+# RUN npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma
+
+# Build the processor
+RUN npm run build --workspace=apps/processor
+
+EXPOSE 3004
+
+CMD ["npm", "start", "--workspace=apps/processor"]

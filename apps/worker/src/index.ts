@@ -9,7 +9,7 @@ import { json } from "zod";
 
 const kafka = new Kafka({
   clientId: "outbox-sweeper",
-  brokers: ["localhost:9092"]
+  brokers: ["kafka:9092"]
 })
 
 
@@ -108,11 +108,9 @@ async function main(){
             const cookie = ParseData(metadata.cookie, zapRunMetadata);
 
             console.log(url,data ,cookie);
-            console.log(JSON.parse(data), (url), (cookie))
-            const bodydata  = JSON.parse(data)
 
             //we should hit the url,cookie,body=data using axios
-            sendWebhook(url, cookie, bodydata);
+            sendWebhook(url, cookie, data);
 
           }
           await new Promise(r => setTimeout(r, 500));

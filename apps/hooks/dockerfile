@@ -1,0 +1,27 @@
+# apps/hooks/Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY turbo.json ./
+COPY apps/hooks/package.json ./apps/hooks/
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies
+RUN npm install --prefer-offline --no-audit
+
+# Copy source code
+COPY apps/hooks/ ./apps/hooks/
+COPY packages/db/ ./packages/db/
+
+# Generate Prisma client for Linux
+RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+# Build the hooks service using the correct workspace name
+RUN npm run build --workspace=zapier-hooks  
+
+EXPOSE 3003
+
+CMD ["npm", "start", "--workspace=zapier-hooks"]  

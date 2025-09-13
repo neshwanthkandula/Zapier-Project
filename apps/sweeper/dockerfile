@@ -1,0 +1,25 @@
+# apps/sweeper/Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY turbo.json ./
+COPY apps/sweeper/package.json ./apps/sweeper/
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies
+RUN npm install --prefer-offline --no-audit
+
+# Copy source code
+COPY apps/sweeper/ ./apps/sweeper/
+COPY packages/db/ ./packages/db/
+
+# Generate Prisma client
+RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+# Build the sweeper
+RUN cd apps/sweeper && npm run build
+
+CMD ["node", "apps/sweeper/dist/index.js"]

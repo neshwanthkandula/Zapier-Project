@@ -2,9 +2,9 @@ import axios from "axios";
 
 export async function sendWebhook(url: string, cookie: string, body: string) {
   try {
+    console.log("IN sendhook")
     const response = await axios.post(url, body, {
       headers: {
-        "Content-Type": "application/json",
         "Cookie": cookie // optional, if needed
       }
     });

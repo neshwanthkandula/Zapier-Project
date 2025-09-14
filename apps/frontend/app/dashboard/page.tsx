@@ -47,7 +47,10 @@ function useZaps(){
     }).then((res)=>{
       setlLoading(false);
       return setZaps(res.data.zaps)
+    }).catch((e)=>{
+      console.log(e)
     })
+    
   }, [])
   
 

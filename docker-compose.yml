@@ -24,6 +24,8 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+    env_file:
+      - .env  # ← Add this line
     depends_on:
       processor:
         condition: service_started

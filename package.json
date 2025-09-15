@@ -2,13 +2,11 @@
   "name": "Zapier",
   "private": true,
   "scripts": {
-  
     "dev": "turbo run dev",
     "dev:with-env": "dotenv -e .env -- turbo run dev",
     "build": "turbo run build",
     "build:with-env": "dotenv -e .env -- turbo run build",
-
-    "start": "dotenv -e ./.env -- turbo run start",
+    "start": "dotenv -e .env -- turbo run start",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

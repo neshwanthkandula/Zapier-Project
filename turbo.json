@@ -1,34 +1,30 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "ui": "tui",
   "extends": ["//"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "PROCESSOR_PORT",
+    "FRONTEND_PORT",
+    "HOOKS_PORT",
+    "NEXT_PUBLIC_VM_IP",
+    "NEXT_PUBLIC_BACKEND_PORT",
+    "NEXT_PUBLIC_HOOK_PORT",
+    "NODE_ENV",
+    "KAFKA_BROKER"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^db:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["DATABASE_URL"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
       "dependsOn": ["^db:generate"],
       "cache": false,
       "persistent": true
     },
-    "db:generate": {
-      "cache": false
-    },
-    "db:migrate": {
-      "cache": false,
-      "persistent": true
-    },
-    "db:deploy": {
-      "cache": false
-    }
+    "db:generate": { "cache": false },
+    "db:migrate": { "cache": false, "persistent": true },
+    "db:deploy": { "cache": false }
   }
 }

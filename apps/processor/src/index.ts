@@ -7,7 +7,7 @@ import  cors from "cors"
 
 const app = express();
 app.use(express.json());
-app.options('*', cors()); 
+app.use(cors()); 
 
 
 app.use("/api/v1/user", userRouter);

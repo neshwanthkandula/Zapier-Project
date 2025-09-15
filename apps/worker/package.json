@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@repo/db": "*",
     "@types/express": "^4.17.21",
     "axios": "^1.12.1",
     "cors": "^2.8.5",

@@ -5,11 +5,10 @@ import { publishToKafka } from "../src/producer"
 import { ParseData } from "./parse";
 import { sendEmail } from "./Sendemail"
 import { sendWebhook } from "./myprojecthook";
-import { json } from "zod";
 
 const kafka = new Kafka({
   clientId: "outbox-sweeper",
-  brokers: ["kafka:9092"]
+   brokers: ["localhost:9092"]
 })
 
 

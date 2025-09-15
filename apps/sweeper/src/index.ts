@@ -1,9 +1,14 @@
 import { prisma } from "@repo/db";
 import { Kafka } from "kafkajs";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+console.log("kafka brooker" + process.env.KAFKA_BROKER);
 
 const kafka = new Kafka({
   clientId: "outbox-sweeper",
-  brokers: ["kafka:9092"]  // Change to "kafka:9092" in Docker
+  brokers: [process.env.KAFKA_BROKER || "localhost:9092"] //make it process.kafka_brooker
 });
 
 const TOPIC_NAME = "zap-events";
